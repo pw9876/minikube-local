@@ -24,15 +24,19 @@ jobs:
 
   quality:
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: SonarQube Scan
+        if: env.SONAR_HOST_URL != ''
         uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Skip notice
+        if: env.SONAR_HOST_URL == ''
+        run: echo "::notice::SONAR_HOST_URL not configured — skipping SonarQube scan. Add the SONAR_HOST_URL and SONAR_TOKEN repo secrets to enable."
 
   test:
     runs-on: ubuntu-latest
